@@ -1,0 +1,163 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tool Tài Xỉu MD5 Go88 - DeepLogic V8 FULL (AutoStart)</title>
+  <style>
+    body { background: #000; color: #FFD700; font-family: 'Arial Black', sans-serif; padding: 20px; text-align: center; }
+    h1 { font-size: 28px; color: #00FFCC; text-shadow: 0 0 8px #FFD700; }
+    .box {
+      background: #111; border: 2px solid #FFD700; border-radius: 10px;
+      padding: 20px; max-width: 820px; margin: auto; box-shadow: 0 0 15px #ffaa00;
+    }
+    button {
+      margin: 8px; padding: 12px 24px; font-size: 18px; border: none;
+      border-radius: 8px; cursor: pointer; font-weight: bold;
+    }
+    .tai { background: #00ffcc; color: #000; }
+    .xiu { background: #ff6699; color: #000; }
+    .reset { background: #999; color: #fff; }
+    select, input {
+      padding: 10px; margin-top: 10px; font-size: 16px;
+      border-radius: 6px; width: 80%;
+    }
+    .result, .recommend, .trend, .history, .log { margin-top: 20px; font-size: 18px; }
+    .highlight { font-size: 26px; color: #00ff99; text-shadow: 0 0 10px #00ffcc; font-weight: bold; }
+    footer { margin-top: 30px; font-size: 14px; color: #888; }
+  </style>
+</head>
+<body>
+  <h1>💎 Tool DeepLogic V8 – Mở Tool Ăn Thông MD5 Go88</h1>
+  <div class="box">
+    <p><strong>Nhập kết quả hoặc gửi ảnh cầu:</strong></p>
+    <select id="inputMode" onchange="toggleInputMode()">
+      <option value="manual">✍️ Nhập bằng tay</option>
+      <option value="image">📷 Ảnh cầu MD5</option>
+    </select>
+
+    <div id="manualInput" style="display:block;">
+      <button class="tai" onclick="add('Tài')">➕ Tài</button>
+      <button class="xiu" onclick="add('Xỉu')">➕ Xỉu</button>
+      <button class="reset" onclick="undo()">↩️ Xoá gần nhất</button>
+      <button class="reset" onclick="resetAll()">🗑️ Reset</button>
+    </div>
+    <div id="imageInput" style="display:none;">
+      <input type="file" id="imageUpload" accept="image/*" onchange="simulateImageOCR()"/>
+    </div>
+
+    <div class="history" id="history">Đã nhập: (0)</div>
+
+    <p><strong>Vốn hiện tại (VNĐ):</strong></p>
+    <input type="number" id="capitalInput" placeholder="VD: 50000" />
+
+    <p><strong>Chế độ AI:</strong></p>
+    <select id="modeSelect">
+      <option value="adaptive">🧠 Tự chọn mẫu theo nhịp cầu</option>
+      <option value="safe">🔐 An toàn (≥90%)</option>
+      <option value="fast">⚡ Kéo nhanh (≥85%)</option>
+    </select>
+
+    <br/><br/>
+    <button onclick="analyze()" class="tai">📊 Dự Đoán</button>
+    <div class="trend" id="trend"></div>
+    <div class="result" id="result"></div>
+    <div class="recommend" id="recommend"></div>
+    <div class="log" id="logResult">📈 Log đúng/sai: 0/0 (0%)</div>
+  </div>
+  <footer>Cre by Trần Quốc Trịnh – DeepLogic V8 (Mở Tool Ăn Thông)</footer>
+
+<script>
+let history = [], correct = 0, total = 0;
+let waitingForPattern = true, skipCount = 0;
+
+function toggleInputMode() {
+  const mode = document.getElementById("inputMode").value;
+  document.getElementById("manualInput").style.display = mode === "manual" ? "block" : "none";
+  document.getElementById("imageInput").style.display = mode === "image" ? "block" : "none";
+}
+
+function simulateImageOCR() {
+  history = ["Tài", "Xỉu", "Xỉu", "Tài", "Tài", "Xỉu", "Xỉu", "Tài", "Tài", "Xỉu",
+             "Tài", "Tài", "Xỉu", "Xỉu", "Tài", "Xỉu", "Tài", "Xỉu", "Tài", "Xỉu", "Xỉu"];
+  showHistory();
+}
+
+function add(val) {
+  if (history.length >= 21) return alert("⚠️ Đã đủ 21 kết quả!");
+  history.push(val); showHistory();
+}
+
+function undo() { history.pop(); showHistory(); }
+function resetAll() {
+  history = []; skipCount = 0; waitingForPattern = true;
+  showHistory();
+  document.getElementById("result").innerText = "";
+  document.getElementById("recommend").innerText = "";
+  document.getElementById("trend").innerText = "";
+}
+
+function showHistory() {
+  document.getElementById("history").innerHTML = "Đã nhập: (" + history.length + ") → " + history.join(" ");
+}
+
+function analyze() {
+  const capital = parseInt(document.getElementById("capitalInput").value.trim());
+  const mode = document.getElementById("modeSelect").value;
+  if (history.length < 7 || isNaN(capital)) {
+    document.getElementById("result").innerText = "⚠️ Nhập đủ cầu và vốn hợp lệ!";
+    return;
+  }
+
+  if (waitingForPattern) {
+    skipCount++;
+    const pattern = detectPattern(history.slice(-7));
+    document.getElementById("trend").innerText = "🔍 Dò mẫu khởi động (" + skipCount + "/5): " + pattern.trend;
+    if (pattern.confidence >= 90 || skipCount >= 5) {
+      waitingForPattern = false;
+      document.getElementById("trend").innerText = "✅ Mẫu chuẩn phát hiện: " + pattern.trend;
+    } else {
+      history.shift(); showHistory();
+      document.getElementById("result").innerText = "⏳ Chưa vào tiền – đang dò mẫu ẩn...";
+      document.getElementById("recommend").innerText = "";
+      return;
+    }
+  }
+
+  const last7 = history.slice(-7);
+  const trend = detectPattern(last7);
+  document.getElementById("trend").innerText = "🔍 Phân tích mẫu cầu: " + trend.trend;
+  document.getElementById("result").innerHTML = `🔮 Dự đoán: <span class="highlight">${trend.predict}</span> (${trend.confidence}%)`;
+
+  let suggest = trend.confidence >= 90 ? Math.floor(capital * 0.3) : Math.floor(capital * 0.2);
+  if (trend.confidence < 85) {
+    suggest = 0;
+    document.getElementById("recommend").innerText = "🚫 KHÔNG NÊN VÀO TIỀN";
+  } else {
+    document.getElementById("recommend").innerText = `💰 Gợi ý cược: ${suggest} VNĐ`;
+  }
+
+  const expected = trend.predict;
+  const actual = history[history.length - 1];
+  total += 1;
+  if (expected === actual) correct += 1;
+  const winrate = Math.round((correct / total) * 100);
+  document.getElementById("logResult").innerText = `📈 Log đúng/sai: ${correct}/${total} (${winrate}%)`;
+
+  history.shift(); showHistory();
+}
+
+function detectPattern(seq) {
+  const last = seq.slice(-3).join("-");
+  if (last === "Tài-Tài-Tài") return { trend: "Bệt Tài", predict: "Xỉu", confidence: 94 };
+  if (last === "Xỉu-Xỉu-Xỉu") return { trend: "Bệt Xỉu", predict: "Tài", confidence: 94 };
+  if (last === "Tài-Xỉu-Tài") return { trend: "Đảo ngắn", predict: "Xỉu", confidence: 88 };
+  if (last === "Xỉu-Tài-Xỉu") return { trend: "Đảo ngắn", predict: "Tài", confidence: 88 };
+  if (seq.slice(-5).every(x => x === "Tài")) return { trend: "Cầu bệt sâu", predict: "Xỉu", confidence: 95 };
+  if (seq.slice(-5).every(x => x === "Xỉu")) return { trend: "Cầu bệt sâu", predict: "Tài", confidence: 95 };
+  return { trend: "Không rõ cầu", predict: "⚠️ KHÔNG ĐOÁN", confidence: 0 };
+}
+</script>
+</body>
+</html>
